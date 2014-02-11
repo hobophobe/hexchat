@@ -90,7 +90,7 @@ struct _SexySpellEntryPriv
 };
 
 static void sexy_spell_entry_class_init(SexySpellEntryClass *klass);
-static void sexy_spell_entry_editable_init (GtkEditableClass *iface);
+static void sexy_spell_entry_editable_init (GtkEditableInterface *iface);
 static void sexy_spell_entry_init(SexySpellEntry *entry);
 static void sexy_spell_entry_finalize(GObject *obj);
 static void sexy_spell_entry_destroy(GObject *obj);
@@ -216,7 +216,7 @@ sexy_spell_entry_class_init(SexySpellEntryClass *klass)
 
 	object_class->dispose = sexy_spell_entry_destroy;
 
-	widget_class->expose_event = sexy_spell_entry_expose;
+	/* widget_class->expose_event = sexy_spell_entry_expose; FIXME: replace with draw */ 
 	widget_class->button_press_event = sexy_spell_entry_button_press;
 
 	/**
@@ -243,7 +243,7 @@ sexy_spell_entry_class_init(SexySpellEntryClass *klass)
 }
 
 static void
-sexy_spell_entry_editable_init (GtkEditableClass *iface)
+sexy_spell_entry_editable_init (GtkEditableInterface *iface)
 {
 }
 
@@ -258,18 +258,20 @@ gtk_entry_find_position (GtkEntry *entry, gint x)
 	gint pos;
 	gboolean trailing;
 
-	x = x + entry->scroll_offset;
+	x = x + GPOINTER_TO_INT (g_object_get_data (G_OBJECT (entry), "scroll-offset"));
 
 	layout = gtk_entry_get_layout(entry);
 	text = pango_layout_get_text(layout);
-	cursor_index = g_utf8_offset_to_pointer(text, entry->current_pos) - text;
+	cursor_index = g_utf8_offset_to_pointer(text,
+						GPOINTER_TO_INT (g_object_get_data (G_OBJECT (entry), "cursor-position"))) - text;
 
 	line = pango_layout_get_lines(layout)->data;
 	pango_layout_line_x_to_index(line, x * PANGO_SCALE, &index, &trailing);
 
-	if (index >= cursor_index && entry->preedit_length) {
-		if (index >= cursor_index + entry->preedit_length) {
-			index -= entry->preedit_length;
+	/* FIXME: see gtk_entry_layout_index_to_text_index()? */
+	if (index >= cursor_index /* && entry->preedit_length */) {
+		if (index >= cursor_index /* + entry->preedit_length */) {
+			index /*-= entry->preedit_length */;
 		} else {
 			index = cursor_index;
 			trailing = FALSE;
@@ -1062,6 +1064,7 @@ sexy_spell_entry_recheck_all(SexySpellEntry *entry)
 	}
 }
 
+#if 0 /* FIXME: move to draw signal */
 static gint
 sexy_spell_entry_expose(GtkWidget *widget, GdkEventExpose *event)
 {
@@ -1075,6 +1078,7 @@ sexy_spell_entry_expose(GtkWidget *widget, GdkEventExpose *event)
 
 	return GTK_WIDGET_CLASS(parent_class)->expose_event (widget, event);
 }
+#endif
 
 static gint
 sexy_spell_entry_button_press(GtkWidget *widget, GdkEventButton *event)

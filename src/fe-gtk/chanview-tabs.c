@@ -19,6 +19,8 @@
 
 /* file included in chanview.c */
 
+#include "gtkcompat.h"
+
 typedef struct
 {
 	GtkWidget *outer;	/* outer box */
@@ -72,11 +74,11 @@ cv_tabs_sizealloc (GtkWidget *widget, GtkAllocation *allocation, chanview *cv)
 	if (cv->vertical)
 	{
 		adj = gtk_viewport_get_vadjustment (GTK_VIEWPORT (gtk_widget_get_parent (inner)));
-		gdk_window_get_geometry (parent_win, 0, 0, 0, &viewport_size, 0);
+		compat_gdk_window_get_geometry (parent_win, 0, 0, 0, &viewport_size, 0);
 	} else
 	{
 		adj = gtk_viewport_get_hadjustment (GTK_VIEWPORT (gtk_widget_get_parent (inner)));
-		gdk_window_get_geometry (parent_win, 0, 0, &viewport_size, 0, 0);
+		compat_gdk_window_get_geometry (parent_win, 0, 0, &viewport_size, 0, 0);
 	}
 
 	if (gtk_adjustment_get_upper (adj) <= viewport_size)
@@ -149,11 +151,11 @@ tab_scroll_left_up_clicked (GtkWidget *widget, chanview *cv)
 	if (cv->vertical)
 	{
 		adj = gtk_viewport_get_vadjustment (GTK_VIEWPORT (gtk_widget_get_parent(inner)));
-		gdk_window_get_geometry (parent_win, 0, 0, 0, &viewport_size, 0);
+		compat_gdk_window_get_geometry (parent_win, 0, 0, 0, &viewport_size, 0);
 	} else
 	{
 		adj = gtk_viewport_get_hadjustment (GTK_VIEWPORT (gtk_widget_get_parent(inner)));
-		gdk_window_get_geometry (parent_win, 0, 0, &viewport_size, 0, 0);
+		compat_gdk_window_get_geometry (parent_win, 0, 0, &viewport_size, 0, 0);
 	}
 
 	new_value = tab_search_offset (inner, gtk_adjustment_get_value (adj), 0, cv->vertical);
@@ -198,11 +200,11 @@ tab_scroll_right_down_clicked (GtkWidget *widget, chanview *cv)
 	if (cv->vertical)
 	{
 		adj = gtk_viewport_get_vadjustment (GTK_VIEWPORT (gtk_widget_get_parent(inner)));
-		gdk_window_get_geometry (parent_win, 0, 0, 0, &viewport_size, 0);
+		compat_gdk_window_get_geometry (parent_win, 0, 0, 0, &viewport_size, 0);
 	} else
 	{
 		adj = gtk_viewport_get_hadjustment (GTK_VIEWPORT (gtk_widget_get_parent(inner)));
-		gdk_window_get_geometry (parent_win, 0, 0, &viewport_size, 0, 0);
+		compat_gdk_window_get_geometry (parent_win, 0, 0, &viewport_size, 0, 0);
 	}
 
 	new_value = tab_search_offset (inner, gtk_adjustment_get_value (adj), 1, cv->vertical);

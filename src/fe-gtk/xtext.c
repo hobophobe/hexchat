@@ -47,6 +47,7 @@
 #include "fe-gtk.h"
 #include "xtext.h"
 #include "fkeys.h"
+#include "gtkcompat.h"
 
 #define charlen(str) g_utf8_skip[*(guchar *)(str)]
 
@@ -486,7 +487,7 @@ gtk_xtext_adjustment_set (xtext_buffer *buf, int fire_signal)
 		if (adj->upper == 0)
 			adj->upper = 1;
 
-		adj->page_size = GTK_WIDGET (buf->xtext)->allocation.height /
+		adj->page_size = gtk_widget_get_allocated_height (GTK_WIDGET (buf->xtext))/
 							  buf->xtext->fontsize;
 		adj->page_increment = adj->page_size;
 
@@ -561,7 +562,7 @@ gtk_xtext_new (GdkColor palette[], int separator)
 }
 
 static void
-gtk_xtext_destroy (GtkObject * object)
+gtk_xtext_destroy (GObject * object)
 {
 	GtkXText *xtext = GTK_XTEXT (object);
 
@@ -622,8 +623,8 @@ gtk_xtext_destroy (GtkObject * object)
 		xtext->orig_buffer = NULL;
 	}
 
-	if (GTK_OBJECT_CLASS (parent_class)->destroy)
-		(*GTK_OBJECT_CLASS (parent_class)->destroy) (object);
+	if (G_OBJECT_CLASS (parent_class)->dispose)
+		(*G_OBJECT_CLASS (parent_class)->dispose) (object);
 }
 
 static void
@@ -648,10 +649,10 @@ gtk_xtext_realize (GtkWidget * widget)
 	gtk_widget_set_realized (widget, TRUE);
 	xtext = GTK_XTEXT (widget);
 
-	attributes.x = widget->allocation.x;
-	attributes.y = widget->allocation.y;
-	attributes.width = widget->allocation.width;
-	attributes.height = widget->allocation.height;
+	attributes.x = gtk_widget_get_allocated_x(widget);
+	attributes.y = gtk_widget_get_allocated_y(widget);
+	attributes.width = gtk_widget_get_allocated_width(widget);
+	attributes.height = gtk_widget_get_allocated_height(widget);
 	attributes.wclass = GDK_INPUT_OUTPUT;
 	attributes.window_type = GDK_WINDOW_CHILD;
 	attributes.event_mask = gtk_widget_get_events (widget) |
@@ -697,7 +698,7 @@ gtk_xtext_size_allocate (GtkWidget * widget, GtkAllocation * allocation)
 	if (allocation->width == xtext->buffer->window_width)
 		height_only = TRUE;
 
-	widget->allocation = *allocation;
+	gtk_widget_set_allocation (widget, allocation);
 	if (gtk_widget_get_realized (GTK_WIDGET(widget)))
 	{
 		xtext->buffer->window_width = allocation->width;
@@ -966,8 +967,8 @@ gtk_xtext_paint (GtkWidget *widget, GdkRectangle *area)
 	int x, y;
 
 	if (area->x == 0 && area->y == 0 &&
-		 area->height == widget->allocation.height &&
-		 area->width == widget->allocation.width)
+		 area->height == gtk_widget_get_allocated_height(widget) &&
+		 area->width == gtk_widget_get_allocated_width(widget))
 	{
 		dontscroll (xtext->buffer);	/* force scrolling off */
 		gtk_xtext_render_page (xtext);
@@ -995,14 +996,14 @@ gtk_xtext_paint (GtkWidget *widget, GdkRectangle *area)
 	/* y is the last pixel y location it rendered text at */
 	y = gtk_xtext_render_ents (xtext, ent_start, ent_end);
 
-	if (y && y < widget->allocation.height && !ent_end->next)
+	if (y && y < gtk_widget_get_allocated_height(widget) && !ent_end->next)
 	{
 		GdkRectangle rect;
 
 		rect.x = 0;
 		rect.y = y;
-		rect.width = widget->allocation.width;
-		rect.height = widget->allocation.height - y;
+		rect.width = gtk_widget_get_allocated_width(widget);
+		rect.height = gtk_widget_get_allocated_height(widget) - y;
 
 		/* fill any space below the last line that also intersects with
 			the exposure rectangle */
@@ -1631,7 +1632,7 @@ gtk_xtext_motion_notify (GtkWidget * widget, GdkEventMotion * event)
 
 	if (xtext->moving_separator)
 	{
-		if (x < (3 * widget->allocation.width) / 5 && x > 15)
+		if (x < (3 * gtk_widget_get_allocated_width(widget)) / 5 && x > 15)
 		{
 			tmp = xtext->buffer->indent;
 			xtext->buffer->indent = x;
@@ -1810,7 +1811,7 @@ gtk_xtext_button_release (GtkWidget * widget, GdkEventButton * event)
 	{
 		xtext->moving_separator = FALSE;
 		old = xtext->buffer->indent;
-		if (event->x < (4 * widget->allocation.width) / 5 && event->x > 15)
+		if (event->x < (4 * gtk_widget_get_allocated_width(widget)) / 5 && event->x > 15)
 			xtext->buffer->indent = event->x;
 		gtk_xtext_fix_indent (xtext->buffer);
 		if (xtext->buffer->indent != old)
@@ -2180,11 +2181,11 @@ gtk_xtext_scroll_adjustments (GtkXText *xtext, GtkAdjustment *hadj, GtkAdjustmen
 static void
 gtk_xtext_class_init (GtkXTextClass * class)
 {
-	GtkObjectClass *object_class;
+	GObjectClass *object_class;
 	GtkWidgetClass *widget_class;
 	GtkXTextClass *xtext_class;
 
-	object_class = (GtkObjectClass *) class;
+	object_class = (GObjectClass *) class;
 	widget_class = (GtkWidgetClass *) class;
 	xtext_class = (GtkXTextClass *) class;
 
@@ -2209,7 +2210,7 @@ gtk_xtext_class_init (GtkXTextClass * class)
 							G_TYPE_NONE,
 							2, GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
 
-	object_class->destroy = gtk_xtext_destroy;
+	object_class->dispose = gtk_xtext_destroy;
 
 	widget_class->realize = gtk_xtext_realize;
 	widget_class->unrealize = gtk_xtext_unrealize;
@@ -2220,7 +2221,7 @@ gtk_xtext_class_init (GtkXTextClass * class)
 	widget_class->motion_notify_event = gtk_xtext_motion_notify;
 	widget_class->selection_clear_event = (void *)gtk_xtext_selection_kill;
 	widget_class->selection_get = gtk_xtext_selection_get;
-	widget_class->expose_event = gtk_xtext_expose;
+	/* widget_class->draw = gtk_xtext_expose; FIXME: replace with draw */
 	widget_class->scroll_event = gtk_xtext_scroll;
 	widget_class->leave_notify_event = gtk_xtext_leave_notify;
 	widget_class->set_scroll_adjustments_signal = xtext_signals[SET_SCROLL_ADJUSTMENTS];

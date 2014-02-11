@@ -91,6 +91,7 @@ GdkColor colors[] = {
 void
 palette_alloc (GtkWidget * widget)
 {
+#if 0 /* FIXME: Use GdkVisual */
 	int i;
 	static int done_alloc = FALSE;
 	GdkColormap *cmap;
@@ -102,6 +103,7 @@ palette_alloc (GtkWidget * widget)
 		for (i = MAX_COL; i >= 0; i--)
 			gdk_colormap_alloc_color (cmap, &colors[i], FALSE, TRUE);
 	}
+#endif
 }
 
 /* maps HexChat 2.0.x colors to current */

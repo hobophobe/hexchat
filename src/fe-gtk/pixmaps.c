@@ -47,42 +47,6 @@ GdkPixbuf *pix_tree_util;
 GdkPixbuf *pix_book;
 GdkPixbuf *pix_hexchat;
 
-static GdkPixmap *
-pixmap_load_from_file_real (char *file)
-{
-	GdkPixbuf *img;
-	GdkPixmap *pixmap;
-
-	img = gdk_pixbuf_new_from_file (file, 0);
-	if (!img)
-		return NULL;
-	gdk_pixbuf_render_pixmap_and_mask (img, &pixmap, NULL, 128);
-	g_object_unref (img);
-
-	return pixmap;
-}
-
-GdkPixmap *
-pixmap_load_from_file (char *filename)
-{
-	char buf[256];
-	GdkPixmap *pix;
-
-	if (filename[0] == '\0')
-		return NULL;
-
-	pix = pixmap_load_from_file_real (filename);
-	if (pix == NULL)
-	{
-		strcpy (buf, "Cannot open:\n\n");
-		strncpy (buf + 14, filename, sizeof (buf) - 14);
-		buf[sizeof (buf) - 1] = 0;
-		fe_message (buf, FE_MSG_ERROR);
-	}
-
-	return pix;
-}
-
 /* load custom icons from <config>/icons, don't mess in system folders */
 static GdkPixbuf *
 load_pixmap (const char *filename)

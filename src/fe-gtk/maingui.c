@@ -561,13 +561,19 @@ mg_progressbar_update (GtkWidget *bar)
 		if (type == 0)
 		{
 			type = 1;
+#if !GTK_CHECK_VERSION (3, 0, 0)
 			gtk_progress_bar_set_orientation ((GtkProgressBar *) bar,
 														 GTK_PROGRESS_RIGHT_TO_LEFT);
+#else
+			/* invert replaces this? */
+#endif
 		} else
 		{
 			type = 0;
+#if !GTK_CHECK_VERSION (3, 0, 0)
 			gtk_progress_bar_set_orientation ((GtkProgressBar *) bar,
 														 GTK_PROGRESS_LEFT_TO_RIGHT);
+#endif
 		}
 		pos = 0.05;
 	}
@@ -3776,7 +3782,7 @@ mg_is_gui_target (GdkDragContext *context)
 gboolean
 mg_drag_begin_cb (GtkWidget *widget, GdkDragContext *context, gpointer userdata)
 {
-#ifndef WIN32	/* leaks GDI pool memory - don't use on win32 */
+#if 0
 	int width, height;
 	GdkColormap *cmap;
 	GdkPixbuf *pix, *pix2;
@@ -3843,6 +3849,7 @@ mg_drag_drop_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, guint
 gboolean
 mg_drag_motion_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, guint time, gpointer scbar)
 {
+#if 0
 	GdkGC *gc;
 	GdkColor col;
 	GdkGCValues val;
@@ -3911,6 +3918,7 @@ mg_drag_motion_cb (GtkWidget *widget, GdkDragContext *context, int x, int y, gui
 	}
 
 	g_object_unref (gc);
+#endif
 
 	return TRUE;
 }

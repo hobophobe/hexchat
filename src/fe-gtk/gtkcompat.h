@@ -31,8 +31,6 @@
 #if !GTK_CHECK_VERSION(3, 0, 0)
 #define gtk_widget_get_allocated_height(widget)((GTK_WIDGET(widget))->GSEAL(allocation).height)
 #define gtk_widget_get_allocated_width(widget)((GTK_WIDGET(widget))->GSEAL(allocation).width)
-#define gtk_widget_get_allocated_x(widget)((GTK_WIDGET(widget))->GSEAL(allocation).x)
-#define gtk_widget_get_allocated_y(widget)((GTK_WIDGET(widget))->GSEAL(allocation).y)
 #endif
 
 #endif /* HEXCHAT_GTKCOMPAT_H */

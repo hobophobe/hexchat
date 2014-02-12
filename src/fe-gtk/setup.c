@@ -1390,6 +1390,7 @@ setup_color_ok_cb (GtkWidget *button, GtkWidget *dialog)
 
 	color_change = TRUE;
 
+#if 0
 	gtk_color_selection_get_current_color (GTK_COLOR_SELECTION (gtk_color_selection_dialog_get_color_selection (cdialog)), col);
 
 	gdk_colormap_alloc_color (gtk_widget_get_colormap (button), col, TRUE, TRUE);
@@ -1401,6 +1402,7 @@ setup_color_ok_cb (GtkWidget *button, GtkWidget *dialog)
 
 	/* is this line correct?? */
 	gdk_colormap_free_colors (gtk_widget_get_colormap (button), &old_color, 1);
+#endif
 
 	gtk_widget_destroy (dialog);
 }

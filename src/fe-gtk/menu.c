@@ -561,7 +561,7 @@ static void
 menu_popup (GtkWidget *menu, GdkEventButton *event, gpointer objtounref)
 {
 	if (event && event->window)
-		gtk_menu_set_screen (GTK_MENU (menu), gdk_drawable_get_screen (event->window));
+		gtk_menu_set_screen (GTK_MENU (menu), gdk_window_get_screen (event->window));
 
 	g_object_ref (menu);
 	g_object_ref_sink (menu);
@@ -1679,7 +1679,7 @@ menu_about (GtkWidget *wid, gpointer sess)
 #endif
 				get_sys_str (0));
 
-	gtk_about_dialog_set_name (dialog, DISPLAY_NAME);
+	gtk_about_dialog_set_program_name (dialog, DISPLAY_NAME);
 	gtk_about_dialog_set_version (dialog, PACKAGE_VERSION);
 	gtk_about_dialog_set_license (dialog, license); /* gtk3 can use GTK_LICENSE_GPL_2_0 */
 	gtk_about_dialog_set_website (dialog, "http://hexchat.github.io");
@@ -1796,6 +1796,26 @@ static struct mymenu mymenu[] = {
 
 	{0, 0, 0, M_END, 0, 0, 0},
 };
+
+void
+menu_set_away (session_gui *gui, int away)
+{
+	GtkCheckMenuItem *item = GTK_CHECK_MENU_ITEM (gui->menu_item[MENU_ID_AWAY]);
+
+	g_signal_handlers_block_by_func (G_OBJECT (item), menu_away, NULL);
+	gtk_check_menu_item_set_active (item, away);
+	g_signal_handlers_unblock_by_func (G_OBJECT (item), menu_away, NULL);
+}
+
+void
+menu_set_fullscreen (session_gui *gui, int full)
+{
+	GtkCheckMenuItem *item = GTK_CHECK_MENU_ITEM (gui->menu_item[MENU_ID_FULLSCREEN]);
+
+	g_signal_handlers_block_by_func (G_OBJECT (item), menu_fullscreen_toggle, NULL);
+	gtk_check_menu_item_set_active (item, full);
+	g_signal_handlers_unblock_by_func (G_OBJECT (item), menu_fullscreen_toggle, NULL);
+}
 
 GtkWidget *
 create_icon_menu (char *labeltext, void *stock_name, int is_stock)
